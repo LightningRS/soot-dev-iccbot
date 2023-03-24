@@ -75,19 +75,19 @@ public class JLookupSwitchStmt extends AbstractSwitchStmt implements LookupSwitc
     return new JLookupSwitchStmt(getKey(), clonedLookupValues, getTargets(), getDefaultTarget());
   }
 
-  private String toSimpleString(){
+  private String toSimpleString() {
     final char endOfLine = ' ';
     List<String> cases = new ArrayList<>();
     for (IntConstant lookupValue : lookupValues) {
       cases.add(String.valueOf(lookupValue.value));
     }
-    if (getDefaultTarget() != null){
+    if (getDefaultTarget() != null) {
       cases.add("def");
     }
-      return Jimple.LOOKUPSWITCH + "(" + keyBox.getValue().toString() + ')' + endOfLine
-              + "{" + endOfLine
-              + "cases:" + String.join(",", cases) + endOfLine
-              + "}";
+    return Jimple.LOOKUPSWITCH + "(" + keyBox.getValue().toString() + ')' + endOfLine
+            + "{" + endOfLine
+            + "cases:" + String.join(",", cases) + endOfLine
+            + "}";
   }
 
   @Override
@@ -102,7 +102,7 @@ public class JLookupSwitchStmt extends AbstractSwitchStmt implements LookupSwitc
       IntConstant c = it.next();
       buf.append("    " + Jimple.CASE + " ").append(c).append(": " + Jimple.GOTO + " ");
       Unit target = getTarget(it.previousIndex());
-      if (target instanceof JLookupSwitchStmt){
+      if (target instanceof JLookupSwitchStmt) {
         buf.append(target == this ? "self" : ((JLookupSwitchStmt) target).toSimpleString()).append(';').append(endOfLine);
       } else {
         buf.append(target).append(';').append(endOfLine);
@@ -111,10 +111,10 @@ public class JLookupSwitchStmt extends AbstractSwitchStmt implements LookupSwitc
     {
       buf.append("    " + Jimple.DEFAULT + ": " + Jimple.GOTO + " ");
       Unit target = getDefaultTarget();
-      if (target instanceof JLookupSwitchStmt){
-          buf.append(target == this ? "self" : ((JLookupSwitchStmt) target).toSimpleString()).append(';').append(endOfLine);
+      if (target instanceof JLookupSwitchStmt) {
+        buf.append(target == this ? "self" : ((JLookupSwitchStmt) target).toSimpleString()).append(';').append(endOfLine);
       } else {
-          buf.append(target).append(';').append(endOfLine);
+        buf.append(target).append(';').append(endOfLine);
       }
     }
     buf.append('}');

@@ -1002,7 +1002,6 @@ public class FastHierarchy {
           }
         }
       }
-      idx++;
     }
     return candidate;
   }
