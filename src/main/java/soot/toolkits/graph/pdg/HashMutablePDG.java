@@ -22,23 +22,11 @@ package soot.toolkits.graph.pdg;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-
 import soot.Body;
 import soot.SootClass;
-import soot.toolkits.graph.Block;
-import soot.toolkits.graph.BlockGraph;
-import soot.toolkits.graph.DominatorNode;
-import soot.toolkits.graph.DominatorTree;
-import soot.toolkits.graph.HashMutableEdgeLabelledDirectedGraph;
-import soot.toolkits.graph.UnitGraph;
+import soot.toolkits.graph.*;
+
+import java.util.*;
 
 /**
  * This class implements a Program Dependence Graph as defined in
@@ -326,7 +314,7 @@ public class HashMutablePDG extends HashMutableEdgeLabelledDirectedGraph<PDGNode
             } else {
 
               PDGNode predPDGofdepB = this.getPredsOf(depBPDGNode).get(0);
-              assert (this.m_obj2pdgNode.containsKey(rdepB));
+              if (this.m_obj2pdgNode.containsKey(rdepB)) return;
               PDGNode pdgnodeOfdepBRegion = this.m_obj2pdgNode.get(rdepB);
               // If the loop header has not been separated from its weak region yet
 
@@ -391,7 +379,7 @@ public class HashMutablePDG extends HashMutableEdgeLabelledDirectedGraph<PDGNode
                       }
                     }
                   }
-                  assert (loopBodyPDGNode != null);
+                  if(loopBodyPDGNode==null) return;
                   ((LoopedPDGNode) newpdgnode).setBody(loopBodyPDGNode);
 
                   PDGNode prev = depBPDGNode.getPrev();
