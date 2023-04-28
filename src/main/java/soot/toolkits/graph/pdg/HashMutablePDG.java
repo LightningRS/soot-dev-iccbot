@@ -314,7 +314,7 @@ public class HashMutablePDG extends HashMutableEdgeLabelledDirectedGraph<PDGNode
             } else {
 
               PDGNode predPDGofdepB = this.getPredsOf(depBPDGNode).get(0);
-              if (this.m_obj2pdgNode.containsKey(rdepB)) return;
+              if (!this.m_obj2pdgNode.containsKey(rdepB)) return;
               PDGNode pdgnodeOfdepBRegion = this.m_obj2pdgNode.get(rdepB);
               // If the loop header has not been separated from its weak region yet
 
