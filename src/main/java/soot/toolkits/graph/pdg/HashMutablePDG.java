@@ -547,7 +547,7 @@ public class HashMutablePDG extends HashMutableEdgeLabelledDirectedGraph<PDGNode
   }
 
   private static PDGRegion pdgpostorder(PDGNode node, List<PDGRegion> list) {
-    if (node.getVisited()) {
+    if (node ==null || node.getVisited()) {
       return null;
     }
     node.setVisited(true);
