@@ -67,8 +67,8 @@ public class HashMutablePDG extends HashMutableEdgeLabelledDirectedGraph<PDGNode
   protected List<Region> m_strongRegions = null;
   protected PDGNode m_startNode = null;
   protected List<PDGRegion> m_pdgRegions = null;
-  private RegionAnalysis m_regionAnalysis = null;
-  private int m_strongRegionStartID;
+  protected RegionAnalysis m_regionAnalysis = null;
+  protected int m_strongRegionStartID;
 
   public HashMutablePDG(UnitGraph cfg) {
     this.m_body = cfg.getBody();
@@ -629,7 +629,7 @@ public class HashMutablePDG extends HashMutableEdgeLabelledDirectedGraph<PDGNode
     return null;
   }
 
-  private void replaceInGraph(PDGNode newnode, PDGNode oldnode) {
+  protected void replaceInGraph(PDGNode newnode, PDGNode oldnode) {
     this.addNode(newnode);
 
     HashMutableEdgeLabelledDirectedGraph<PDGNode, String> graph = clone();
