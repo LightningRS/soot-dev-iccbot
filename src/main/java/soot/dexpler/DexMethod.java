@@ -115,7 +115,8 @@ public class DexMethod {
           // add the body of this code item
           DexBody dexBody = new DexBody(dexEntry, method, declaringClass.getType());
           dexBody.jimplify(b, m);
-        } catch (InvalidDalvikBytecodeException e) {
+          //fix bug in getBody: change InvalidDalvikBytecodeException to RuntimeException
+        } catch (RuntimeException e) {
           String msg = "Warning: Invalid bytecode in method " + m + ": " + e;
           logger.debug("" + msg);
           Util.emptyBody(b);
