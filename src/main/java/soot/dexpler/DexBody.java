@@ -35,12 +35,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.jf.dexlib2.analysis.ClassPath;
 import org.jf.dexlib2.analysis.ClassPathResolver;
@@ -140,7 +140,7 @@ public class DexBody {
   // registers
   protected Local[] registerLocals;
   protected Local storeResultLocal;
-  protected Map<Integer, DexlibAbstractInstruction> instructionAtAddress;
+  protected TreeMap<Integer, DexlibAbstractInstruction> instructionAtAddress;
 
   protected List<DeferableInstruction> deferredInstructions;
   protected Set<RetypeableInstruction> instructionsToRetype;
@@ -263,7 +263,9 @@ public class DexBody {
     }
 
     instructions = new ArrayList<DexlibAbstractInstruction>();
-    instructionAtAddress = new HashMap<Integer, DexlibAbstractInstruction>();
+
+    // Use descending order
+    instructionAtAddress = new TreeMap<Integer, DexlibAbstractInstruction>();
     localDebugs = ArrayListMultimap.create();
     takenLocalNames = new HashSet<String>();
 
@@ -446,27 +448,27 @@ public class DexBody {
    *           if address is not part of this body.
    */
   public DexlibAbstractInstruction instructionAtAddress(int address) {
-    DexlibAbstractInstruction i = null;
-    while (i == null && address >= 0) {
-      // catch addresses can be in the middlde of last instruction. Ex. in
-      // com.letang.ldzja.en.apk:
-      //
-      // 042c46: 7020 2a15 0100 |008f: invoke-direct {v1, v0},
-      // Ljavax/mi...
-      // 042c4c: 2701 |0092: throw v1
-      // catches : 4
-      // <any> -> 0x0065
-      // 0x0069 - 0x0093
-      //
-      // SA, 14.05.2014: We originally scanned only two code units back.
-      // This is not sufficient
-      // if we e.g., have a wide constant and the line number in the debug
-      // sections points to
-      // some address the middle.
-      i = instructionAtAddress.get(address);
-      address--;
+
+    // catch addresses can be in the middlde of last instruction. Ex. in
+    // com.letang.ldzja.en.apk:
+    //
+    // 042c46: 7020 2a15 0100 |008f: invoke-direct {v1, v0},
+    // Ljavax/mi...
+    // 042c4c: 2701 |0092: throw v1
+    // catches : 4
+    // <any> -> 0x0065
+    // 0x0069 - 0x0093
+    //
+    // SA, 14.05.2014: We originally scanned only two code units back.
+    // This is not sufficient
+    // if we e.g., have a wide constant and the line number in the debug
+    // sections points to
+    // some address the middle.
+    Integer key = instructionAtAddress.floorKey(address);
+    if (key == null) {
+      return null;
     }
-    return i;
+    return instructionAtAddress.get(key);
   }
 
   /**
@@ -909,9 +911,15 @@ public class DexBody {
     // before as well, but we didn't know).
     UnreachableCodeEliminator.v().transform(jBody);
 
-    // Not sure whether we need this even though we do it earlier on as
-    // the earlier pass does not have type information
-    // CopyPropagator.v().transform(jBody);
+    // Both, the original type assigner (Efficient Inference of Static
+    // Types for Java Bytecode, 2000) and the fast type assigner
+    // (Efficient local type inference, 2008) do split the local used in
+    // the NewExpr and <init> InvokeExpr in stage 2 to obtain bytecode for
+    // which a valid typing exists. This happens eagerly _for all_ object
+    // creation sites, leading to unnecessary aliases at most of the
+    // object creation sites. Copy Propagation here removes all of these
+    // unnecessary copies from the TypeAssigner.
+    CopyPropagator.v().transform(jBody);
 
     // we might have gotten new dead assignments and unused locals through
     // copy propagation and unreachable code elimination, so we have to do

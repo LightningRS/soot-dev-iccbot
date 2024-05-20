@@ -99,16 +99,19 @@ public class ContextInsensitiveBuilder {
       cgb.build();
       reachables = cgb.reachables();
     }
-    for (final SootClass c : Scene.v().getClasses()) {
+    for (final SootClass c : new ArrayList<>(Scene.v().getClasses())) {
       handleClass(c);
     }
     while (callEdges.hasNext()) {
       Edge e = callEdges.next();
+      if (e == null) {
+        continue;
+      }
       if (!e.isInvalid()) {
         if (e.tgt().isConcrete() || e.tgt().isNative()) {
-	  MethodPAG mpag = MethodPAG.v(pag, e.tgt());
-	  mpag.build();
-	  mpag.addToPAG(null);
+          MethodPAG mpag = MethodPAG.v(pag, e.tgt());
+          mpag.build();
+          mpag.addToPAG(null);
         }
         pag.addCallTarget(e);
       }

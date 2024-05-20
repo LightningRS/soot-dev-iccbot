@@ -1,10 +1,25 @@
 <?xml version="1.0"?>
 <virtualedges>
 	<!-- Thread.start() -->
-	<edge type="THREAD">
+	<edge>
 		<source invoketype="instance" subsignature="void start()" />
 		<targets>
 			<direct subsignature="void run()" target-position="base" />
+			<indirect subsignature="void &lt;init&gt;(java.lang.Runnable)" target-position="base">
+				<direct subsignature="void run()" target-position="argument" index="0"/>
+			</indirect>
+			<indirect subsignature="void &lt;init&gt;(java.lang.Runnable,java.lang.String)" target-position="base" >
+				<direct subsignature="void run()" target-position="argument" index="0"/>
+			</indirect>
+			<indirect subsignature="void &lt;init&gt;(java.lang.ThreadGroup,java.lang.Runnable)" target-position="base">
+				<direct subsignature="void run()" target-position="argument" index="1"/>
+			</indirect>
+			<indirect subsignature="void &lt;init&gt;(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String)" target-position="base">
+				<direct subsignature="void run()" target-position="argument" index="1"/>
+			</indirect>
+			<indirect subsignature="void &lt;init&gt;(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long)" target-position="base">
+				<direct subsignature="void run()" target-position="argument" index="1"/>
+			</indirect>
 		</targets>
 	</edge>
 
@@ -152,7 +167,11 @@
 		<targets>
 			<direct
 				subsignature="java.lang.Object doInBackground(java.lang.Object[])"
-				target-position="base" />
+				target-position="base">
+				<parameterMappings>
+					<direct sourceIdx="0" targetIdx="0" />
+				</parameterMappings>	
+			</direct>
 		</targets>
 	</edge>
 	<edge>
@@ -163,9 +182,17 @@
 				target-position="base" />
 			<direct
 				subsignature="void onProgressUpdate(java.lang.Object[])"
-				target-position="base" />
+				target-position="base">
+				<parameterMappings>
+					<direct sourceIdx="0" targetIdx="0" />
+				</parameterMappings>
+			</direct>
 			<direct subsignature="void onPostExecute(java.lang.Object)"
-				target-position="base" />
+				target-position="base">
+				<parameterMappings>
+					<direct sourceIdx="0" targetIdx="0" />
+				</parameterMappings>
+			</direct>
 		</targets>
 	</edge>
 	<!-- doPrivileged -->
@@ -631,6 +658,64 @@
 		<targets>
 			<direct
 				subsignature="boolean onResourceReady(java.lang.Object,java.lang.Object,com.bumptech.glide.request.target.Target,boolean,boolean)"
+				target-position="argument" index="0" />
+		</targets>
+	</edge>
+
+	<!-- java.util.Map -->
+	<edge>
+		<source invoketype="instance"
+				subsignature="java.lang.Object compute(java.lang.Object,java.util.function.BiFunction)" />
+		<targets>
+			<direct
+				subsignature="java.lang.Object apply(java.lang.Object,java.lang.Object)"
+				target-position="argument" index="1" />
+		</targets>
+	</edge>
+	<edge>
+		<source invoketype="instance"
+				subsignature="java.lang.Object computeIfAbsent(java.lang.Object,java.util.function.Function)" />
+		<targets>
+			<direct
+				subsignature="java.lang.Object apply(java.lang.Object)"
+				target-position="argument" index="1" />
+		</targets>
+	</edge>
+	<edge>
+		<source invoketype="instance"
+				subsignature="java.lang.Object computeIfPresent(java.lang.Object,java.util.function.BiFunction)" />
+		<targets>
+			<direct
+				subsignature="java.lang.Object apply(java.lang.Object,java.lang.Object)"
+				target-position="argument" index="1" />
+		</targets>
+	</edge>
+	<edge>
+		<source invoketype="instance"
+				subsignature="java.lang.Object merge(java.lang.Object,java.lang.Object,java.util.function.BiFunction)" />
+		<targets>
+			<direct
+				subsignature="java.lang.Object apply(java.lang.Object,java.lang.Object)"
+				target-position="argument" index="2" />
+		</targets>
+	</edge>
+	<edge>
+		<source invoketype="instance"
+				subsignature="void replaceAll(java.util.function.BiFunction)" />
+		<targets>
+			<direct
+				subsignature="java.lang.Object apply(java.lang.Object,java.lang.Object)"
+				target-position="argument" index="0" />
+		</targets>
+	</edge>
+
+	<!-- java.util.List -->
+	<edge>
+		<source invoketype="instance"
+				subsignature="void replaceAll(java.util.function.UnaryOperator)" />
+		<targets>
+			<direct
+				subsignature="java.lang.Object apply(java.lang.Object)"
 				target-position="argument" index="0" />
 		</targets>
 	</edge>

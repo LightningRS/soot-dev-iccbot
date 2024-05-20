@@ -147,7 +147,7 @@ public class MethodNodeFactory extends AbstractShimpleValueSwitch {
       }
     }
 
-    s.apply(new AbstractStmtSwitch() {
+    s.apply(new AbstractStmtSwitch<Node>() {
       @Override
       final public void caseAssignStmt(AssignStmt as) {
         Value l = as.getLeftOp();
@@ -249,7 +249,8 @@ public class MethodNodeFactory extends AbstractShimpleValueSwitch {
       if (vie.getBase().getType() instanceof RefType) {
         RefType rt = (RefType) vie.getBase().getType();
         if (rt.getSootClass().getName().equals("java.lang.Class")) {
-          if (vie.getMethodRef().name().equals("newInstance") && vie.getMethodRef().parameterTypes().size() == 0) {
+          SootMethodRef ref = vie.getMethodRef();
+          if (ref.getName().equals("newInstance") && ref.getParameterTypes().size() == 0) {
             return true;
           }
         }
@@ -468,4 +469,13 @@ public class MethodNodeFactory extends AbstractShimpleValueSwitch {
   protected final MethodPAG mpag;
   protected SootMethod method;
   protected ClientAccessibilityOracle accessibilityOracle = Scene.v().getClientAccessibilityOracle();
+
+  /**
+   * Returns the method
+   * 
+   * @return the method
+   */
+  public SootMethod getMethod() {
+    return method;
+  }
 }

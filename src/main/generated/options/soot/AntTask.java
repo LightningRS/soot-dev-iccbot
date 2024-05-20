@@ -115,10 +115,6 @@ public class AntTask extends MatchingTask {
 
 
 
-        public void setcoffi(boolean arg) {
-            if(arg) addArg("-coffi");
-        }
-  
         public void setjasmin_backend(boolean arg) {
             if(arg) addArg("-jasmin-backend");
         }
@@ -250,6 +246,11 @@ public class AntTask extends MatchingTask {
             return process_jar_dir.createPath();
         }
   
+        public void setvirtualedges_path(String arg) {
+            addArg("-virtualedges-path");
+            addArg(arg);
+        }
+  
         public void setderive_java_version(boolean arg) {
             if(arg) addArg("-derive-java-version");
         }
@@ -340,6 +341,10 @@ public class AntTask extends MatchingTask {
   
         public void setdrop_bodies_after_load(boolean arg) {
             if(arg) addArg("-drop-bodies-after-load");
+        }
+  
+        public void setnative_code(boolean arg) {
+            if(arg) addArg("-native-code");
         }
   
         public void setoutput_dir(String arg) {

@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 
 import soot.JavaClassProvider.JarException;
 import soot.asm.AsmClassProvider;
+import soot.asm.AsmClassSource;
 import soot.asm.AsmJava9ClassProvider;
 import soot.dexpler.DexFileProvider;
 import soot.dotnet.AssemblyFile;
@@ -166,7 +167,12 @@ public class SourceLocator {
   }
 
   public static SourceLocator v() {
-    return ModuleUtil.module_mode() ? G.v().soot_ModulePathSourceLocator() : G.v().soot_SourceLocator();
+    G g = G.v();
+    if (g.soot_ModuleUtil().isInModuleMode()) {
+      return g.soot_ModulePathSourceLocator();
+    } else {
+      return g.soot_SourceLocator();
+    }
   }
 
   /**
@@ -241,7 +247,7 @@ public class SourceLocator {
           public ClassSource find(String className) {
             String fileName = className.replace('.', '/') + ".class";
             InputStream stream = cl.getResourceAsStream(fileName);
-            return (stream == null) ? null : new CoffiClassSource(className, stream, fileName);
+            return (stream == null) ? null : new AsmClassSource(className, new ClassLoaderFoundFile(cl, fileName));
           }
         }.find(className);
         if (ret != null) {
@@ -260,7 +266,7 @@ public class SourceLocator {
         String fileName = className.replace('.', '/') + ".class";
         InputStream stream = cl.getResourceAsStream(fileName);
         if (stream != null) {
-          return new CoffiClassSource(className, stream, fileName);
+          return new AsmClassSource(className, new ClassLoaderFoundFile(cl, fileName));
         }
       }
     }
@@ -273,10 +279,7 @@ public class SourceLocator {
 
   protected void setupClassProviders() {
     final List<ClassProvider> classProviders = new LinkedList<ClassProvider>();
-    if (this.java9Mode) {
-      classProviders.add(new AsmJava9ClassProvider());
-    }
-    final ClassProvider classFileClassProvider = Options.v().coffi() ? new CoffiClassProvider() : new AsmClassProvider();
+    final ClassProvider classFileClassProvider = new AsmClassProvider();
     switch (Options.v().src_prec()) {
       case Options.src_prec_class:
         classProviders.add(classFileClassProvider);
@@ -313,6 +316,9 @@ public class SourceLocator {
         break;
       default:
         throw new RuntimeException("Other source precedences are not currently supported.");
+    }
+    if (this.java9Mode) {
+      classProviders.add(new AsmJava9ClassProvider());
     }
     this.classProviders = classProviders;
   }
@@ -767,6 +773,17 @@ public class SourceLocator {
    */
   public void clearDexClassPathExtensions() {
     this.dexClassPathExtensions = null;
+  }
+
+  /**
+   * Resets the cached class path, class providers, and source path to null.
+   * This method allows for subsequent calls to {@link soot.Scene#loadNecessaryClasses()} 
+   * to recompute and load the classes using updated configurations if provided.
+   */
+  public void resetCaches() {
+    this.classPath = null;
+    this.classProviders = null;
+    this.sourcePath = null;
   }
 
   protected enum ClassSourceType {

@@ -221,11 +221,6 @@
     <section>
         <name>General Options</name>
         <boolopt>
-            <name>Coffi Frontend</name>
-            <alias>coffi</alias>
-            <short_desc>Use the good old Coffi front end for parsing Java bytecode (instead of using ASM).</short_desc>
-        </boolopt>
-        <boolopt>
             <name>Jasmin Backend</name>
             <alias>jasmin-backend</alias>
             <short_desc>Use the Jasmin back end for generating Java bytecode (instead of using ASM).</short_desc>
@@ -596,6 +591,16 @@
                 </p>
             </long_desc>
         </listopt>
+        <stropt>
+            <name>VirtualEdges Path</name>
+            <alias>virtualedges-path</alias>
+            <short_desc>Path to virtual edges configuration used in call graphs</short_desc>
+            <long_desc>
+                <p>
+                    Use virtual edges configuration file from location <alias/> used in call graph algorithms.
+                </p>
+            </long_desc>
+        </stropt>
         <boolopt>
             <name>Derive Java version from input</name>
             <alias>derive-java-version</alias>
@@ -917,6 +922,19 @@
                 garbage
                 collection of the method source. On the other hand, if the body is ever released, it cannot easily be
                 recovered (i.e., loaded again) easily.
+            </long_desc>
+        </boolopt>
+        <boolopt>
+            <name>Enable native code</name>
+            <alias>nc</alias>
+            <alias>native-code</alias>
+            <default>false</default>
+            <short_desc>Enables native methods to be concrete. Needed for analyzing the Java Native Interface.</short_desc>
+            <long_desc>
+                This option is needed, when analyzing native code. Particularly when using the 
+                Java Native Interface (JNI). If this option is enabled (set true), it allows 
+                native methods to be concrete. This flag will be checked in the 
+                SootMethod.isConcrete() method, allowing native methods to have a body.
             </long_desc>
         </boolopt>
     </section>
