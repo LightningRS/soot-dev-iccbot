@@ -253,7 +253,6 @@ import soot.UnknownType;
 import soot.Value;
 import soot.ValueBox;
 import soot.VoidType;
-import soot.coffi.Util;
 import soot.jimple.AddExpr;
 import soot.jimple.ArrayRef;
 import soot.jimple.AssignStmt;
@@ -588,7 +587,7 @@ public class AsmMethodSource implements MethodSource {
         }
       }
       int op = opr.insn.getOpcode();
-      if (l == null && op != GETFIELD && op != GETSTATIC && (op < IALOAD && op > SALOAD)) {
+      if (l == null && op != GETFIELD && op != GETSTATIC && (op < IALOAD || op > SALOAD)) {
         continue;
       }
       Local stack = newStackLocal();
@@ -1511,7 +1510,7 @@ public class AsmMethodSource implements MethodSource {
       // create ref to actual method
 
       // Generate parameters & returnType & parameterTypes
-      Type[] types = Util.v().jimpleTypesOfFieldOrMethodDescriptor(insn.desc);
+      Type[] types = AsmUtil.jimpleTypesOfFieldOrMethodDescriptor(insn.desc);
       int nrArgs = types.length - 1;
       List<Type> parameterTypes = new ArrayList<Type>(nrArgs);
       List<Value> methodArgs = new ArrayList<Value>(nrArgs);
@@ -2339,6 +2338,12 @@ public class AsmMethodSource implements MethodSource {
         Collection<LocalVariableNode> lvns = e.getValue();
         if (lvns.size() > 1) {
           final Integer localNum = e.getKey();
+
+          // Skip this index if it has not been referenced by a converted instruction
+          if (!this.locals.containsKey(localNum)) {
+            continue;
+          }
+
           final Local chosen = this.locals.get(localNum);
           final String chosenName = chosen.getName();
           final Type chosenType = chosen.getType();

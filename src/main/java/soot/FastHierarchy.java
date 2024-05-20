@@ -58,6 +58,7 @@ import soot.util.NumberedString;
 public class FastHierarchy {
 
   protected static final int USE_INTERVALS_BOUNDARY = 100;
+  private final boolean isDotNet = Options.v().src_prec() == Options.src_prec_dotnet;
 
   protected Table<SootClass, NumberedString, SootMethod> typeToVtbl = HashBasedTable.create();
 
@@ -877,7 +878,7 @@ public class FastHierarchy {
     // When there is no proper dispatch found, we simply return null to let the caller decide what to do
     SootMethod candidate = null;
     boolean calleeExist = declaringClass.getMethodUnsafe(subsignature) != null;
-    for (SootClass concreteType = baseType; concreteType != null && ignoreList.add(concreteType);) {
+    for (SootClass concreteType = baseType; concreteType != null;) {
       candidate = getSignaturePolymorphicMethod(concreteType, name, parameterTypes, returnType);
       if (candidate != null) {
         if (!calleeExist || isVisible(concreteType, declaringClass, candidate.getModifiers())) {
@@ -904,7 +905,7 @@ public class FastHierarchy {
       // determining the most specific super interface
       HashSet<SootClass> interfaceIgnoreList = new HashSet<>();
       for (SootClass concreteType = baseType; concreteType != null;) {
-        Queue<SootClass> worklist = new LinkedList<>(concreteType.getInterfaces());
+        Queue<SootClass> worklist = new ArrayDeque<>(concreteType.getInterfaces());
         // we have to determine the "most specific super interface"
         while (!worklist.isEmpty()) {
           SootClass iFace = worklist.poll();
@@ -941,7 +942,7 @@ public class FastHierarchy {
     return candidate;
   }
 
-  private boolean isHandleDefaultMethods() {
+  protected boolean isHandleDefaultMethods() {
     int version = Options.v().java_version();
     return version == 0 || version > 7;
   }
@@ -985,7 +986,7 @@ public class FastHierarchy {
         returnType = method.getReturnType();
       }
       // if dotnet structs or generics
-      if (Options.v().src_prec() == Options.src_prec_dotnet) {
+      if (isDotNet) {
         if (method.getParameterCount() == parameterTypes.size() && canStoreType(returnType, method.getReturnType())) {
           boolean canStore = true;
           for (int i = 0; i < method.getParameterCount(); i++) {

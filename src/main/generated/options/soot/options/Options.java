@@ -147,10 +147,6 @@ public class Options extends OptionsBase {
 
             if (false);
             else if (false
-                    || option.equals("coffi")
-            )
-                coffi = true;
-            else if (false
                     || option.equals("jasmin-backend")
             )
                 jasmin_backend = true;
@@ -328,6 +324,22 @@ public class Options extends OptionsBase {
                 if (process_jar_dir == null)
                     process_jar_dir = new LinkedList<>();
                 process_jar_dir.add(value);
+            }
+            else if (false
+                    || option.equals("virtualedges-path")
+            ) {
+                if (!hasMoreOptions()) {
+                    G.v().out.println("No value given for option -" + option);
+                    return false;
+                }
+
+                String value = nextOption();
+                if (virtualedges_path.isEmpty())
+                    virtualedges_path = value;
+                else {
+                    G.v().out.println("Duplicate values " + virtualedges_path + " and " + value + " for option -" + option);
+                    return false;
+                }
             }
             else if (false
                     || option.equals("no-derive-java-version")
@@ -531,6 +543,11 @@ public class Options extends OptionsBase {
                     || option.equals("no-drop-bodies-after-load")
             )
                 drop_bodies_after_load = false;
+            else if (false
+                    || option.equals("nc")
+                    || option.equals("native-code")
+            )
+                native_code = true;
             else if (false
                     || option.equals("d")
                     || option.equals("output-dir")
@@ -1451,10 +1468,6 @@ public class Options extends OptionsBase {
         return true;
     }
 
-    public boolean coffi() { return coffi; }
-    private boolean coffi = false;
-    public void set_coffi(boolean setting) { coffi = setting; }
-
     public boolean jasmin_backend() { return jasmin_backend; }
     private boolean jasmin_backend = false;
     public void set_jasmin_backend(boolean setting) { jasmin_backend = setting; }
@@ -1565,6 +1578,10 @@ public class Options extends OptionsBase {
     public void set_process_jar_dir(List<String> setting) { process_jar_dir = setting; }
     private List<String> process_jar_dir = null;
 
+    public String virtualedges_path() { return virtualedges_path; }
+    public void set_virtualedges_path(String setting) { virtualedges_path = setting; }
+    private String virtualedges_path = "";
+
     public boolean derive_java_version() { return derive_java_version; }
     private boolean derive_java_version = true;
     public void set_derive_java_version(boolean setting) { derive_java_version = setting; }
@@ -1643,6 +1660,10 @@ public class Options extends OptionsBase {
     public boolean drop_bodies_after_load() { return drop_bodies_after_load; }
     private boolean drop_bodies_after_load = true;
     public void set_drop_bodies_after_load(boolean setting) { drop_bodies_after_load = setting; }
+
+    public boolean native_code() { return native_code; }
+    private boolean native_code = false;
+    public void set_native_code(boolean setting) { native_code = setting; }
 
     public String output_dir() { return output_dir; }
     public void set_output_dir(String setting) { output_dir = setting; }
@@ -1824,7 +1845,6 @@ public class Options extends OptionsBase {
     public String getUsage() {
         return ""
                 + "\nGeneral Options:\n"
-                + padOpt("-coffi", "Use the good old Coffi front end for parsing Java bytecode (instead of using ASM).")
                 + padOpt("-jasmin-backend", "Use the Jasmin back end for generating Java bytecode (instead of using ASM).")
                 + padOpt("-h, -help", "Display help and exit")
                 + padOpt("-pl, -phase-list", "Print list of available phases")
@@ -1852,6 +1872,7 @@ public class Options extends OptionsBase {
                 + padOpt("-search-dex-in-archives", "Also includes Jar and Zip files when searching for DEX files under the provided classpath.")
                 + padOpt("-process-path ARG -process-dir ARG", "Process all classes found in ARG (but not classes within JAR files in ARG , use process-jar-dir for that)")
                 + padOpt("-process-jar-dir ARG", "Process all classes found in JAR files found in ARG")
+                + padOpt("-virtualedges-path ARG", "Path to virtual edges configuration used in call graphs")
                 + padOpt("-derive-java-version", "Java version for output and internal processing will be derived from the given input classes")
                 + padOpt("-oaat", "From the process-dir, processes one class at a time.")
                 + padOpt("-android-jars ARG", "Use ARG as the path for finding the android.jar file")
@@ -1877,6 +1898,7 @@ public class Options extends OptionsBase {
                 + padOpt("-polyglot", "Use Java 1.4 Polyglot frontend instead of JastAdd")
                 + padOpt("-permissive-resolving", "Use alternative sources when classes cannot be found using the normal resolving strategy")
                 + padOpt("-drop-bodies-after-load", "Drop the method source after it has served its purpose of loading the method body")
+                + padOpt("-nc, -native-code", "Enables native methods to be concrete. Needed for analyzing the Java Native Interface.")
                 + "\nOutput Options:\n"
                 + padOpt("-d ARG -output-dir ARG", "Store output files in ARG")
                 + padOpt("-f ARG -output-format ARG", "Set output format for Soot")
