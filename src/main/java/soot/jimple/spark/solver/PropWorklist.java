@@ -71,18 +71,23 @@ public class PropWorklist extends Propagator {
     }
 
     boolean verbose = pag.getOpts().verbose();
+    int totalCnt = 0;
     do {
-      if (verbose) {
+      // if (verbose) {
         logger.debug("Worklist has " + varNodeWorkList.size() + " nodes.");
-      }
+      // }
       while (!varNodeWorkList.isEmpty()) {
+        totalCnt++;
+        if (totalCnt % 10000 == 0) {
+          logger.debug(String.format("Processed varNodes %d, left varNodes %d", totalCnt, varNodeWorkList.size()));
+        }
         VarNode src = varNodeWorkList.iterator().next();
         varNodeWorkList.remove(src);
         handleVarNode(src);
       }
-      if (verbose) {
+      // if (verbose) {
         logger.debug("Now handling field references");
-      }
+      // }
       for (VarNode src : pag.storeSources()) {
         Node[] targets = pag.storeLookup(src);
         for (Node element0 : targets) {

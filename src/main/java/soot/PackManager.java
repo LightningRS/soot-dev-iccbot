@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.zip.GZIPOutputStream;
@@ -637,10 +639,26 @@ public class PackManager {
     CountingThreadPoolExecutor executor
         = new CountingThreadPoolExecutor(threadNum, threadNum, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
+    AtomicInteger clsCnt = new AtomicInteger(0);
+    AtomicInteger cls10Percent = new AtomicInteger(1);
+    AtomicBoolean isClsCntReady = new AtomicBoolean(false);
+    AtomicInteger doneCls = new AtomicInteger(0);
     while (classes.hasNext()) {
       final SootClass c = classes.next();
-      executor.execute(() -> runBodyPacks(c));
+      clsCnt.getAndIncrement();
+      executor.execute(() -> {
+        int currClsIdx = doneCls.getAndIncrement();
+        if (isClsCntReady.get() && currClsIdx % cls10Percent.get() == 0) {
+          float p = (float) currClsIdx / clsCnt.get() * 100.0f;
+          logger.info(String.format("This is class %d/%d (%.2f%%)", currClsIdx, clsCnt.get(), p));
+        }
+        runBodyPacks(c);
+      });
     }
+    int p = ((int)(clsCnt.get() * 0.1));
+    cls10Percent.set(p > 0 ? p : 1);
+    isClsCntReady.set(true);
+    logger.info(String.format("There are totally %d classes to run body packs (by %d threads)", clsCnt.get(), threadNum));
 
     // Wait till all packs have been executed
     try {
@@ -1214,17 +1232,35 @@ public class PackManager {
     CountingThreadPoolExecutor executor
         = new CountingThreadPoolExecutor(threadNum, threadNum, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
+    int clsCnt = 0;
+    AtomicInteger methodCnt = new AtomicInteger(0);
+    AtomicInteger method10Percent = new AtomicInteger(1);
+    AtomicBoolean isMethodCntReady = new AtomicBoolean(false);
+    AtomicInteger doneMethodCnt = new AtomicInteger(0);
     for (Iterator<SootClass> clIt = reachableClasses(); clIt.hasNext();) {
+      clsCnt++;
       SootClass cl = clIt.next();
       // note: the following is a snapshot iterator;
       // this is necessary because it can happen that phantom methods
       // are added during resolution
       for (SootMethod m : new ArrayList<SootMethod>(cl.getMethods())) {
         if (m.isConcrete()) {
-          executor.execute(() -> m.retrieveActiveBody());
+          methodCnt.getAndIncrement();
+          executor.execute(() -> {
+            m.retrieveActiveBody();
+            int currDone = doneMethodCnt.getAndIncrement();
+            if (isMethodCntReady.get() && currDone % method10Percent.get() == 0) {
+              float p = (float) currDone / methodCnt.get() * 100.0f;
+              logger.info(String.format("This is method %d/%d (%.2f%%)", currDone, methodCnt.get(), p));
+            }
+          });
         }
       }
     }
+    int p = (int)(methodCnt.get() * 0.1);
+    method10Percent.set(p > 0 ? p : 1);
+    isMethodCntReady.set(true);
+    logger.info(String.format("There are totally %d classes with %d methods to retrieve (by %d threads)", clsCnt, methodCnt.get(), threadNum));
 
     // Wait till all method bodies have been loaded
     try {
