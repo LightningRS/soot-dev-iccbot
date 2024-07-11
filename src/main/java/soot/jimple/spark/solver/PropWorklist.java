@@ -72,6 +72,7 @@ public class PropWorklist extends Propagator {
 
     boolean verbose = pag.getOpts().verbose();
     int totalCnt = 0;
+    Boolean isForceEnd = false;
     do {
       // if (verbose) {
         logger.debug("Worklist has " + varNodeWorkList.size() + " nodes.");
@@ -80,6 +81,11 @@ public class PropWorklist extends Propagator {
         totalCnt++;
         if (totalCnt % 10000 == 0) {
           logger.debug(String.format("Processed varNodes %d, left varNodes %d", totalCnt, varNodeWorkList.size()));
+        }
+        if (totalCnt >= 200000) {
+          logger.warn("Too many varNodes (>= 200000), force break.");
+          isForceEnd = true;
+          break;
         }
         VarNode src = varNodeWorkList.iterator().next();
         varNodeWorkList.remove(src);
@@ -120,7 +126,10 @@ public class PropWorklist extends Propagator {
       for (PointsToSetInternal nDotF : nodesToFlush) {
         nDotF.flushNew();
       }
-    } while (!varNodeWorkList.isEmpty());
+    } while (!varNodeWorkList.isEmpty() && !isForceEnd);
+    if (isForceEnd) {
+      logger.warn("Too many varNodes, force break!");
+    }
   }
 
   /* End of public methods. */
